@@ -1,0 +1,50 @@
+# XV6 Scheduler Modifications
+
+This version of XV6 has been modified to include:
+
+1. Process priority system (0-20, with 0 being lowest priority)
+2. Lottery scheduling instead of round-robin
+3. Context switch counter that prints "330" after every 3 context switches
+
+## System Calls
+
+Two new system calls have been added:
+
+1. `int getpriority(void)` - Returns the priority of the current process
+2. `int setpriority(int pid, int priority)` - Sets the priority of a process with the given PID
+   - Can only be called by the parent process
+   - Priority must be between 0 and 20
+   - Returns 0 on success, -1 on failure
+
+## Lottery Scheduler
+
+The scheduler has been changed from round-robin to lottery scheduling:
+
+1. Each process is assigned tickets based on its priority (1 + priority)
+2. The scheduler selects a random ticket and runs the process that owns it
+3. Processes with higher priority have more tickets and thus get more CPU time
+
+## Test Programs
+
+Two test programs are included:
+
+1. `prioritytest` - Tests the priority system calls
+2. `lotterytest` - Tests the lottery scheduler by creating processes with different priorities
+
+## Running the Tests
+
+```
+$ prioritytest
+$ lotterytest
+```
+
+## Implementation Details
+
+The scheduler implementation is in `kernel/proc.c`. The lottery scheduling algorithm:
+
+1. Counts the total number of tickets across all RUNNABLE processes
+2. Selects a random winning ticket
+3. Finds the process that owns the winning ticket
+4. Runs that process
+
+After every 3 context switches, the system prints "330" and waits for 1 second before continuing.
